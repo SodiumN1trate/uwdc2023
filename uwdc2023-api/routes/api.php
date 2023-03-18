@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+Route::apiResource('users', \App\Http\Controllers\Api\UserController::class);
+Route::apiResource('zones', \App\Http\Controllers\Api\ZoneController::class);
+
+Route::get('/messages/{user}', [\App\Http\Controllers\Api\MessageController::class, 'index']);
+Route::post('/messages', [\App\Http\Controllers\Api\MessageController::class, 'store']);
