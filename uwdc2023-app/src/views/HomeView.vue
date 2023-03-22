@@ -7,22 +7,26 @@
           <div>
             <h3>{{ user.name }}</h3>
             <p>working {{ user.created_at }}</p>
+            <button @click="endSession()">End session</button>
           </div>
         </section>
         
         <section class="sidebar-zones">
           <div v-for="(zone, index) in zones" :key="index">
-            <h4>{{ zone.name }} ({{ zone.current_users.length }}/{{ zone.users_count }})</h4>
+            <h4 @click="changeZone(zone.id)">{{ zone.name }} ({{ zone.current_users.length }}/{{ zone.users_count }})</h4>
             <div>
-              <p v-for="(zone_user, index) in zone.current_users" :key="index">{{ zone_user.name }}</p>
+              <p
+                  v-for="(zone_user, index) in zone.current_users"
+                 :key="index"
+              >{{ zone_user.name }}</p>
             </div>
           </div>
         </section>
 
         <section class="sidebar-chat">
           <strong>The office chat</strong>
-          <div class="sidebar-chat-box">
-            <div v-for="(message, index) in messages" :key="messages">
+          <div class="sidebar-chat-box" ref="chat_box">
+            <div v-for="(message, index) in messages" :key="index">
               <strong>{{ message.user.name }}:</strong> {{ message.message }}
             </div>
           </div>
@@ -97,7 +101,9 @@
           draggable="true"
           @dragstart="drag"
           class="draggable"
-          id="user" ref="user"
+          id="user"
+          ref="user"
+          :style="{top: user.y + 'px', left: user.x + 'px'}"
       >
         <img :src="'src/assets/avatars/' + user.avatar">
         <p>{{ user.name }}</p>
@@ -120,13 +126,19 @@ export default {
       },
       user: null,
       users: [],
-      messages: []
+      messages: [],
+      last_channel: 0
     }
   },
-  created() {
-    setInterval(() => this.getMessages(), 2000);
+  created () {
+    window.Echo.channel('user.move').listen('UserMoveEvent',(e)=>{
+      this.axios.get('/users').then((response) => {
+        this.users = response.data.data
+      })
+    })
   },
   mounted () {
+
     this.axios.get('/zones').then((response) => {
       this.zones = response.data.data
     })
@@ -134,33 +146,43 @@ export default {
     this.axios.get('/users').then((response) => {
       this.users = response.data.data
     })
+    this.getUser()
   },
   methods: {
-    getMessages () {
-      this.axios.get('/messages/' + this.user.id ).then((response) => {
+    async getMessages () {
+      await this.axios.get('/messages').then((response) => {
         this.messages = response.data.data
-      })
-      this.axios.get('/users/' + this.user.id, this.session_form).then((response) => {
-        this.user = response.data.data
+        this.$refs.chat_box.scrollTop = this.$refs.chat_box.scrollHeight
       })
     },
-    sendMessage () {
+    async sendMessage () {
       const form = {
         user_id: this.user.id,
         zone_id: this.user.zone_id,
         message: this.chat.message
       }
 
-      this.axios.post('/messages', form).then((response) => {
-        this.axios.get('/messages/' + this.user.id ).then((response) => {
+      await this.axios.post('/messages', form).then(async (response) => {
+        this.chat.message = null
+        console.log(response)
+      })
+    },
+    listenChannel() {
+      window.Echo.leave('zone.' + this.last_channel )
+      window.Echo.private('zone.' + this.user.zone_id ).listen('MessageEvent',(e)=>{
+        this.axios.get('/messages').then(async (response) => {
           this.messages = response.data.data
-          this.chat.message = null
+          this.$refs.chat_box.scrollTop = this.$refs.chat_box.scrollHeight
         })
       })
     },
-    startSession () {
-      this.axios.post('/users', this.session_form).then((response) => {
+    async startSession () {
+      await this.axios.post('/users', this.session_form).then((response) => {
+        console.log(response.data.access_token)
+        window.localStorage.clear()
+        localStorage.setItem('token',  response.data.access_token)
         this.user = response.data.data
+        this.$forceUpdate()
       })
     },
     drag (event) {
@@ -173,7 +195,7 @@ export default {
     dragLeave (event) {
       event.target.style.transform = 'scale(1)'
     },
-    drop (event) {
+    async drop (event) {
       event.target.style.transform = 'scale(1)'
       const id = event.dataTransfer.getData('clientId')
       const element = document.getElementById(id)
@@ -183,13 +205,45 @@ export default {
       this.user.x = event.clientX - 600
       this.user.y = event.clientY - 10
       this.axios.put('/users/' + this.user.id, this.user).then((response) => {
+        this.getUser()
+        this.getZones()
+        this.getMessages()
+      })
+    },
+    async getUser () {
+      this.$forceUpdate()
+      await this.axios.get('/me').then((response) => {
         this.user = response.data.data
-        this.axios.get('/zones').then((response) => {
-          this.zones = response.data.data
-          this.axios.get('/messages/' + this.user.id).then((response) => {
-            this.messages = response.data.data
-          })
+        this.last_channel = response.data.data.zone_id
+        this.listenChannel()
+        this.getMessages()
+      }).catch((e) => {
+        this.user = null
+      })
+    },
+    getZones () {
+      this.axios.get('/zones').then((response) => {
+        this.zones = response.data.data
+        this.axios.get('/messages' ).then((response) => {
+          this.messages = response.data.data
+          this.chat.message = null
+          this.$refs.chat_box.scrollTop = this.$refs.chat_box.scrollHeight
+          this.listenChannel()
         })
+      })
+    },
+    async changeZone (zone_id) {
+      this.user.zone_id = zone_id
+      console.log(zone_id)
+      await this.axios.put('/users/' + this.user.id, this.user).then((response) => {
+        this.getUser()
+        this.getZones()
+      })
+    },
+    async endSession () {
+      await this.axios.get('/end_session').then((response) => {
+        this.getUser()
+        this.$forceUpdate()
       })
     }
   }
@@ -248,7 +302,11 @@ p, h4, h3 {
   padding: 20px;
 }
 
-.sidebar-zones > .sidebar-zone > p {
+.sidebar-zones > div > h4 {
+  cursor: pointer;
+}
+
+.sidebar-zones > div > div > p {
   margin-left: 20px;
 }
 
@@ -268,6 +326,7 @@ p, h4, h3 {
   flex-direction: column;
   gap: 5px;
   overflow: auto;
+  scroll-behavior: smooth;
 }
 
 .sidebar-chat div {

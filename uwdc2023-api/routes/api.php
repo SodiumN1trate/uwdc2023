@@ -17,5 +17,12 @@ use Illuminate\Support\Facades\Route;
 Route::apiResource('users', \App\Http\Controllers\Api\UserController::class);
 Route::apiResource('zones', \App\Http\Controllers\Api\ZoneController::class);
 
-Route::get('/messages/{user}', [\App\Http\Controllers\Api\MessageController::class, 'index']);
 Route::post('/messages', [\App\Http\Controllers\Api\MessageController::class, 'store']);
+
+
+Route::group(['middleware' => ['auth:api']], function() {
+    Route::get('/messages', [\App\Http\Controllers\Api\MessageController::class, 'index']);
+
+    Route::get('/me', [\App\Http\Controllers\Api\UserController::class, 'me']);
+    Route::get('/end_session', [\App\Http\Controllers\Api\UserController::class, 'end']);
+});

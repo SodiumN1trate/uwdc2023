@@ -18,6 +18,7 @@ return new class extends Migration
             $table->smallInteger('x')->nullable();
             $table->smallInteger('y')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

@@ -109,6 +109,40 @@
       <path value="$PROJECT_DIR$/uwdc2023-api/vendor/psr/http-message" />
       <path value="$PROJECT_DIR$/uwdc2023-api/vendor/psr/http-factory" />
       <path value="$PROJECT_DIR$/uwdc2023-api/vendor/composer" />
+      <path value="$PROJECT_DIR$/uwdc2023-api/vendor/symfony/psr-http-message-bridge" />
+      <path value="$PROJECT_DIR$/uwdc2023-api/vendor/nyholm/psr7" />
+      <path value="$PROJECT_DIR$/uwdc2023-api/vendor/php-http/message-factory" />
+      <path value="$PROJECT_DIR$/uwdc2023-api/vendor/firebase/php-jwt" />
+      <path value="$PROJECT_DIR$/uwdc2023-api/vendor/paragonie/constant_time_encoding" />
+      <path value="$PROJECT_DIR$/uwdc2023-api/vendor/paragonie/random_compat" />
+      <path value="$PROJECT_DIR$/uwdc2023-api/vendor/lcobucci/clock" />
+      <path value="$PROJECT_DIR$/uwdc2023-api/vendor/lcobucci/jwt" />
+      <path value="$PROJECT_DIR$/uwdc2023-api/vendor/defuse/php-encryption" />
+      <path value="$PROJECT_DIR$/uwdc2023-api/vendor/phpseclib/phpseclib" />
+      <path value="$PROJECT_DIR$/uwdc2023-api/vendor/psr/clock" />
+      <path value="$PROJECT_DIR$/uwdc2023-api/vendor/league/oauth2-server" />
+      <path value="$PROJECT_DIR$/uwdc2023-api/vendor/league/event" />
+      <path value="$PROJECT_DIR$/uwdc2023-api/vendor/league/uri-interfaces" />
+      <path value="$PROJECT_DIR$/uwdc2023-api/vendor/league/uri" />
+      <path value="$PROJECT_DIR$/uwdc2023-api/vendor/laravel/passport" />
+      <path value="$PROJECT_DIR$/uwdc2023-api/vendor/pusher/pusher-php-server" />
+      <path value="$PROJECT_DIR$/uwdc2023-api/vendor/beyondcode/laravel-websockets" />
+      <path value="$PROJECT_DIR$/uwdc2023-api/vendor/react/dns" />
+      <path value="$PROJECT_DIR$/uwdc2023-api/vendor/evenement/evenement" />
+      <path value="$PROJECT_DIR$/uwdc2023-api/vendor/react/socket" />
+      <path value="$PROJECT_DIR$/uwdc2023-api/vendor/react/promise-stream" />
+      <path value="$PROJECT_DIR$/uwdc2023-api/vendor/react/cache" />
+      <path value="$PROJECT_DIR$/uwdc2023-api/vendor/react/stream" />
+      <path value="$PROJECT_DIR$/uwdc2023-api/vendor/react/promise" />
+      <path value="$PROJECT_DIR$/uwdc2023-api/vendor/react/http" />
+      <path value="$PROJECT_DIR$/uwdc2023-api/vendor/react/promise-timer" />
+      <path value="$PROJECT_DIR$/uwdc2023-api/vendor/react/event-loop" />
+      <path value="$PROJECT_DIR$/uwdc2023-api/vendor/fig/http-message-util" />
+      <path value="$PROJECT_DIR$/uwdc2023-api/vendor/facade/ignition-contracts" />
+      <path value="$PROJECT_DIR$/uwdc2023-api/vendor/cboden/ratchet" />
+      <path value="$PROJECT_DIR$/uwdc2023-api/vendor/ratchet/rfc6455" />
+      <path value="$PROJECT_DIR$/uwdc2023-api/vendor/ringcentral/psr7" />
+      <path value="$PROJECT_DIR$/uwdc2023-api/vendor/paragonie/sodium_compat" />
     </include_path>
   </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="8.1" />
