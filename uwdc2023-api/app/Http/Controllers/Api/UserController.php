@@ -17,7 +17,7 @@ class UserController extends Controller
      */
     public function index()
     {
-        return UserResource::collection(User::all());
+        return UserResource::collection(User::whereNotNull('zone_id')->get());
     }
 
     /**
@@ -35,9 +35,10 @@ class UserController extends Controller
 
         $zone = Zone::inRandomOrder()->first();
         $validated['zone_id'] = $zone->id;
-        $validated['x'] = round($zone->width / 2 + $zone->x - 600);
+        $validated['x'] = round($zone->width / 2 + $zone->x);
         $validated['y'] = round($zone->height / 2 + $zone->y - 10);
         $user = User::create($validated);
+        broadcast(new UserMoveEvent($user->id));
         return [
                 'data' => new UserResource($user),
                 'access_token' => $user->createToken('login')->accessToken,
@@ -64,6 +65,11 @@ class UserController extends Controller
             'x' => 'integer|sometimes',
             'y' => 'integer|sometimes',
         ]);
+        if($request->input('drop') != '1') {
+            $zone = Zone::find($validated['zone_id']);
+            $validated['x'] = round($zone->width / 2 + $zone->x);
+            $validated['y'] = round($zone->height / 2 + $zone->y - 10);
+        }
         $user->update($validated);
         broadcast(new UserMoveEvent($user->id));
         return new UserResource($user);
@@ -75,9 +81,13 @@ class UserController extends Controller
 
     public function end() {
         $zoneId = auth()->user()->zone_id;
+        broadcast(new UserMoveEvent(auth()->user()->id));
+        $user = User::find(auth()->user()->id);
+        $user->zone_id = null;
+        $user->x = null;
+        $user->y = null;
+        $user->save();
         auth()->user()->token()->revoke();
-        User::find(auth()->user()->id)->delete();
-        error_log(count(Zone::find($zoneId)->users));
         if (count(Zone::find($zoneId)->users) === 0) {
             Message::where('zone_id', $zoneId)->delete();
         }

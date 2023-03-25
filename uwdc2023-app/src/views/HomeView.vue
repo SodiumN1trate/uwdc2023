@@ -113,6 +113,8 @@
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
   data () {
     return {
@@ -134,6 +136,9 @@ export default {
     window.Echo.channel('user.move').listen('UserMoveEvent',(e)=>{
       this.axios.get('/users').then((response) => {
         this.users = response.data.data
+        this.axios.get('/zones').then((response) => {
+          this.zones = response.data.data
+        })
       })
     })
   },
@@ -178,8 +183,11 @@ export default {
     },
     async startSession () {
       await this.axios.post('/users', this.session_form).then((response) => {
-        console.log(response.data.access_token)
-        window.localStorage.clear()
+        axios.defaults.headers = {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer ' + response.data.access_token
+        }
+        window.localStorage.removeItem('token')
         localStorage.setItem('token',  response.data.access_token)
         this.user = response.data.data
         this.$forceUpdate()
@@ -204,6 +212,7 @@ export default {
       this.user.zone_id = event.target.id
       this.user.x = event.clientX - 600
       this.user.y = event.clientY - 10
+      this.user.drop = 1
       this.axios.put('/users/' + this.user.id, this.user).then((response) => {
         this.getUser()
         this.getZones()
@@ -215,6 +224,9 @@ export default {
       await this.axios.get('/me').then((response) => {
         this.user = response.data.data
         this.last_channel = response.data.data.zone_id
+        this.axios.get('/zones').then((response) => {
+          this.zones = response.data.data
+        })
         this.listenChannel()
         this.getMessages()
       }).catch((e) => {
@@ -238,10 +250,16 @@ export default {
       await this.axios.put('/users/' + this.user.id, this.user).then((response) => {
         this.getUser()
         this.getZones()
+        this.listenChannel()
       })
     },
     async endSession () {
       await this.axios.get('/end_session').then((response) => {
+        window.localStorage.removeItem('token')
+        axios.defaults.headers = {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer '
+        }
         this.getUser()
         this.$forceUpdate()
       })

@@ -6,6 +6,8 @@ import VueAxios from 'vue-axios'
 import Echo from 'laravel-echo'
 import Pusher from 'pusher-js'
 
+let token = localStorage.getItem('token')
+
 window.Echo = new Echo({
     broadcaster: 'pusher',
     key: 'local',
@@ -19,7 +21,7 @@ window.Echo = new Echo({
     authEndpoint: import.meta.env.VITE_API_ADDRESS + '/broadcasting/auth',
     auth: {
         headers: {
-            Authorization: 'Bearer ' + localStorage.getItem('token')
+            Authorization: 'Bearer ' + token
         }
     }
 });
@@ -29,7 +31,7 @@ const app = createApp(App)
 axios.defaults.baseURL = import.meta.env.VITE_API_ADDRESS
 axios.defaults.headers = {
     'Accept': 'application/json',
-    'Authorization': 'Bearer ' + localStorage.getItem('token')
+    'Authorization': 'Bearer ' + token
 }
 app.use(router)
 app.use(VueAxios, axios)
